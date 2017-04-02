@@ -363,5 +363,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         Intent toHomePageIntent = new Intent(this,HomePageActivity.class);
         startActivity(toHomePageIntent);
     }
+
+    public void toHttpTest(View view){
+        startActivity(new Intent(this, HttpTest.class));
+    }
 }
 
