@@ -1,5 +1,6 @@
 package com.example.shenjack.shitangcustomer;
 
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -10,6 +11,7 @@ import java.io.IOException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -34,7 +36,7 @@ public class HttpTest extends AppCompatActivity {
     public void get(View view) {
         String url = et_get.getText().toString();
         try {
-            tv_response.setText(performGet(url));
+            performGet(url);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -49,9 +51,36 @@ public class HttpTest extends AppCompatActivity {
         }
     }
 
+    public void run(View view) throws Exception {
+        Request request = new Request.Builder()
+                .url("http://publicobject.com/helloworld.txt")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                Headers responseHeaders = response.headers();
+                for (int i = 0; i < responseHeaders.size(); i++) {
+                    System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+
+                }
+                tv_response.append(response.body().toString());
+                System.out.println(response.body().string());
+
+            }
+        });
+    }
+
     OkHttpClient client = new OkHttpClient();
 
-    String performGet(String url) throws IOException {
+    void performGet(String url) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -68,10 +97,18 @@ public class HttpTest extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-
+                final String resp = response.body().string();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tv_response.setText(resp);
+                    }
+                });
             }
         });
     }
+
+
 
     public static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");

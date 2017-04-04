@@ -43,7 +43,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="66dp"
-        android:onClick="get"
+        android:onClick="run"
         android:text="GET"
         app:layout_constraintHorizontal_bias="0.228"
         app:layout_constraintLeft_toLeftOf="parent"
