@@ -82,6 +82,7 @@
         app:layout_constraintVertical_bias="0.0">
 
         <TextView
+            android:textSize="12sp"
             android:id="@+id/tv_http_response"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

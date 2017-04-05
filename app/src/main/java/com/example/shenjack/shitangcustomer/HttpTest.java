@@ -1,6 +1,8 @@
 package com.example.shenjack.shitangcustomer;
 
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -24,6 +26,8 @@ public class HttpTest extends AppCompatActivity {
     EditText et_post;
     TextView tv_response;
 
+    ResponseHandler responseHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +35,8 @@ public class HttpTest extends AppCompatActivity {
         et_get = (EditText) findViewById(R.id.et_for_get);
         et_post = (EditText) findViewById(R.id.et_for_post);
         tv_response = (TextView) findViewById(R.id.tv_http_response);
+        responseHandler = new ResponseHandler();
+
     }
 
     public void get(View view) {
@@ -67,12 +73,18 @@ public class HttpTest extends AppCompatActivity {
                 if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
                 Headers responseHeaders = response.headers();
+                String resp = new String();
+
                 for (int i = 0; i < responseHeaders.size(); i++) {
-                    System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+                    resp+=(responseHeaders.name(i) + ": " + responseHeaders.value(i));
 
                 }
-                tv_response.append(response.body().toString());
-                System.out.println(response.body().string());
+//                tv_response.append(response.body().toString());
+                Message msg = new Message();
+                Bundle bundle = new Bundle();
+                bundle.putString("response",resp);
+                msg.setData(bundle);
+                HttpTest.this.responseHandler.sendMessage(msg);
 
             }
         });
@@ -101,7 +113,11 @@ public class HttpTest extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        tv_response.setText(resp);
+                        Message msg = new Message();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("response",resp);
+                        msg.setData(bundle);
+                        HttpTest.this.responseHandler.sendMessage(msg);
                     }
                 });
             }
@@ -122,6 +138,16 @@ public class HttpTest extends AppCompatActivity {
                 .build();
         Response response = client.newCall(request).execute();
         return response.body().string();
+    }
+
+    class ResponseHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle bundle = msg.getData();
+            String response = bundle.getString("response");
+            tv_response.setText(response);
+        }
     }
 
 }
